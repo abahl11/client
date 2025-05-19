@@ -102,15 +102,29 @@ const JourneyMap = ({ journey }) => {
     libraries,
   });
 
-  const center = useCallback(() => {
-    if (journey.originCoords && journey.destinationCoords) {
-      return {
-        lat: (journey.originCoords.lat + journey.destinationCoords.lat) / 2,
-        lng: (journey.originCoords.lng + journey.destinationCoords.lng) / 2,
-      };
-    }
-    return { lat: 20, lng: 0 }; // Default center
-  }, [journey]);
+  // const center = useCallback(() => {
+  //   if (journey.originCoords && journey.destinationCoords) {
+  //     return {
+  //       lat: (journey.originCoords.lat + journey.destinationCoords.lat) / 2,
+  //       lng: (journey.originCoords.lng + journey.destinationCoords.lng) / 2,
+  //     };
+  //   }
+  //   return { lat: 20, lng: 0 }; // Default center
+  // }, [journey]);
+
+  // In JourneyMap.js
+const center = useCallback(() => {
+  if (journey.originCoords && journey.originCoords.coordinates && 
+      journey.destinationCoords && journey.destinationCoords.coordinates) {
+    // Use GeoJSON format [lng, lat]
+    return {
+      lat: (journey.originCoords.coordinates[1] + journey.destinationCoords.coordinates[1]) / 2,
+      lng: (journey.originCoords.coordinates[0] + journey.destinationCoords.coordinates[0]) / 2
+    };
+  }
+  return { lat: 20, lng: 0 }; // Default center
+}, [journey]);
+
 
   useEffect(() => {
     if (isLoaded && journey.route && journey.route.coordinates) {
@@ -163,8 +177,29 @@ const JourneyMap = ({ journey }) => {
       >
         {!directions && (
           <>
-            <Marker position={journey.originCoords} label="A" />
-            <Marker position={journey.destinationCoords} label="Z" />
+            {/* <Marker position={journey.originCoords} label="A" />
+            <Marker position={journey.destinationCoords} label="Z" /> */}
+{journey.originCoords && journey.originCoords.coordinates ? (
+  <Marker 
+    position={{
+      lat: journey.originCoords.coordinates[1],
+      lng: journey.originCoords.coordinates[0]
+    }} 
+    label="A" 
+  />
+) : null}
+
+{journey.destinationCoords && journey.destinationCoords.coordinates ? (
+  <Marker 
+    position={{
+      lat: journey.destinationCoords.coordinates[1],
+      lng: journey.destinationCoords.coordinates[0]
+    }} 
+    label="Z" 
+  />
+) : null}
+
+
             {routePath.length > 0 && (
               <Polyline
                 path={routePath}
